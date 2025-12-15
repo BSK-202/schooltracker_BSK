@@ -1,33 +1,35 @@
-import { StyleSheet } from 'react-native';
-import Login from './src/screens/Login';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from './src/screens/Login';
 import Home from './src/screens/Home';
-//<TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
-//         <Text style={styles.back}>←</Text>
-//</TouchableOpacity>
+import Signup from './src/screens/Signup';
 
-const Stack = createNativeStackNavigator(); 
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown : false}}>
-
-        <Stack.Screen name="Login" component={Login}/>
-        <Stack.Screen name="Home" component={Home}/>
-
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isLoggedIn ? (
+          // Écrans d'authentification - l'utilisateur n'est PAS connecté
+          <>
+            <Stack.Screen name="Login">
+              {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
+            </Stack.Screen>
+            <Stack.Screen name="Signup">
+              {(props) => <Signup {...props} setIsLoggedIn={setIsLoggedIn} />}
+            </Stack.Screen>
+          </>
+        ) : (
+          // Écrans après authentification - l'utilisateur EST connecté
+          <Stack.Screen name="Home">
+            {(props) => <Home {...props} setIsLoggedIn={setIsLoggedIn} />}
+          </Stack.Screen>
+        )}
       </Stack.Navigator>
-
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
