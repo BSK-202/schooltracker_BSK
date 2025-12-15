@@ -1,48 +1,75 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ImageBackground, TouchableOpacity, Image } from 'react-native';
 import Input from '../components/Input';
+import LoginStyles from '../styles/LoginStyles';
 
 export default function Login(props) {
+  return (
+    <ImageBackground
+      source={require('../../assets/loading_page.png')}
+      style={LoginStyles.background}
+      resizeMode="cover"
+    >
+      <StatusBar style="auto" />
+      
+      <View style={LoginStyles.overlay}>
 
-    return (
+        {/* Conteneur principal centré */}
+        <View style={LoginStyles.contentContainer}>
+          
+          {/* En-tête */}
+          <View style={LoginStyles.header}>
+           
+            <Text style={LoginStyles.welcomeText}>Welcome to School Tracker!</Text>
+            <Text style={LoginStyles.subtitle}>
+              Connectez-vous pour suivre le transport scolaire en temps réel
+            </Text>
+          </View>
 
-        <View style={styles.container}>
-            <View style={{ position: 'absolute', top: 70, left: 20 }}>
-
-                <TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
-                    <Text style={styles.back}>←</Text>
-                </TouchableOpacity>
+          {/* Formulaire */}
+          <View style={LoginStyles.formContainer}>
+            <View style={LoginStyles.inputContainer}>
+              <Input
+                placeholder='Saisissez votre numéro de teléphone'
+                keyboardType='phone-pad'
+                icon="call-outline" // Si votre composant Input supporte les icônes
+              />
             </View>
-            <Text>Welcome to School Tracker!</Text>
-
-            <View >
-                <Image
-                    source={require('../../assets/logo_bus.png')}
-                    style={{ width: 300, height: 300 }}
-                />
-            </View>
-            <Input
-                placeholder='Saisire votre email'
-                keyboardType='email-address'
-            />
-            <Input
-                placeholder='Saisire votre mot de passe'
-                keyboardType='password'
+            
+            <View style={LoginStyles.inputContainer}>
+              <Input
+                placeholder='Saisissez votre mot de passe'
+                keyboardType='default'
                 secureTextEntry={true}
-            />
-        </View>
-    );
-}
+                icon="lock-closed-outline" // Si votre composant Input supporte les icônes
+              />
+            </View>
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    image: {
-        width: 200,
-        height: 200
-    }
-});
+            {/* Bouton de connexion */}
+            <View style={LoginStyles.buttonContainer}>
+              <TouchableOpacity 
+                style={LoginStyles.loginButton}
+                onPress={() => props.navigation.navigate('Home')}
+              >
+                <Text style={LoginStyles.loginButtonText}>Se connecter</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Pied de page */}
+          <View style={LoginStyles.footer}>
+            <TouchableOpacity>
+              <Text style={LoginStyles.forgotPassword}>Mot de passe oublié ?</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => props.navigation.navigate('Signup')}>
+              <Text style={LoginStyles.signupText}>
+                Pas encore de compte ? <Text style={LoginStyles.signupLink}>S'inscrire</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+}

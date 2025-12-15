@@ -1,11 +1,8 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import Login from './src/screens/Login';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './src/screens/Home';
-import LoadingScreen from './src/screens/LoadingScreen';
-
 //<TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
 //         <Text style={styles.back}>←</Text>
 //</TouchableOpacity>
@@ -17,7 +14,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown : false}}>
 
-        <Stack.Screen name="LoadingScreen" component={LoadingScreen}/>
+        <Stack.Screen name="Login" component={Login}/>
         <Stack.Screen name="Home" component={Home}/>
 
       </Stack.Navigator>
