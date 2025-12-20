@@ -9,23 +9,23 @@ import {
 } from 'react-native';
 import Input from '../components/Input';
 import LoginStyles from '../styles/LoginStyles';
+import loginAPI from '../APIS/loginAPI';
 
 export default function Login({ navigation, setIsLoggedIn }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Authentification statique
-    if (phone === '0674336184' && password === '1234') {
-      // Authentification réussie
+  const handleLogin = async () => {
+   
+    try{
+
+      const response = await loginAPI.post("/login",{phone,password});
+      console.log("Response login:",response.data);
       setIsLoggedIn(true);
-      // La navigation vers Home se fera automatiquement via la condition dans App.js
-    } else {
-      Alert.alert(
-        'Erreur',
-        'Numéro de téléphone ou mot de passe incorrect',
-        [{ text: 'OK' }]
-      );
+
+    } catch(error){
+      Alert.alert("Erreur","Phone et password incorrect");
+
     }
   };
 
