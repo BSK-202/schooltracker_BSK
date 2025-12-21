@@ -14,7 +14,6 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isLoggedIn ? (
-          // Écrans d'authentification - l'utilisateur n'est PAS connecté
           <>
             <Stack.Screen name="Login">
               {(props) => <Login {...props} setIsLoggedIn={setIsLoggedIn} />}
@@ -24,7 +23,6 @@ export default function App() {
             </Stack.Screen>
           </>
         ) : (
-          // Écrans après authentification - l'utilisateur EST connecté
           <Stack.Screen name="Home">
             {(props) => <Home {...props} setIsLoggedIn={setIsLoggedIn} />}
           </Stack.Screen>

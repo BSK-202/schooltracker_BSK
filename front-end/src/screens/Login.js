@@ -19,7 +19,7 @@ export default function Login({ navigation, setIsLoggedIn }) {
    
     try{
 
-      const response = await loginAPI.post("/login",{phone,password});
+      const response = await loginAPI.post("/loginTest",{phone,password});
       console.log("Response login:",response.data);
       setIsLoggedIn(true);
 
