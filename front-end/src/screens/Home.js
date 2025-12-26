@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-
+import { Alert } from 'react-native'; // Ajoutez ceci
+import loginAPI from '../APIS/loginAPI';
+// Ajoutez cet import
+import * as SecureStore from 'expo-secure-store';
 // Import des écrans d'onglets
 import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
@@ -13,6 +16,36 @@ import TabStyles from '../styles/TabStyles';
 const Tab = createBottomTabNavigator();
 
 export default function Home({ setIsLoggedIn }) {
+  const [userData, setUserData] = useState({
+    name: '',
+    phone: '',
+    child: '',
+    bus: '',
+    role: ''
+  });
+
+  const getInfo = async () => {
+    try {
+      const token = await SecureStore.getItemAsync("acces_token");
+      console.log("JWT: ", token);
+
+      const response = await loginAPI.get(
+        "/auth/profil",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      setUserData(response.data.profil)
+      console.log(response.data.profil)
+
+    } catch (error) {
+
+      Alert.alert("Erreur", "Erreur lors de recuperation d infos");
+    }
+
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -42,8 +75,13 @@ export default function Home({ setIsLoggedIn }) {
       <Tab.Screen name="Suivi">
         {() => <TrackingTab />}
       </Tab.Screen>
-      <Tab.Screen name="Profil">
-        {() => <ProfileTab setIsLoggedIn={setIsLoggedIn} />}
+      <Tab.Screen name="Profil" listeners={{
+        tabPress: e => {
+          console.log('TabProfil  cliqué');
+          getInfo();
+        },
+      }}>
+        {() => <ProfileTab setIsLoggedIn={setIsLoggedIn} userData={userData} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
