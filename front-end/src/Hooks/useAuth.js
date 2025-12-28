@@ -32,12 +32,13 @@ export const useAuth = () => {
       // Appel au service d'authentification
       const result = await authService.login(loginData.phone, loginData.password);
       
-      if (result.success && result.token) {
+      if (result.success && result.access_token && result.refresh_token) {
         // Stockage sécurisé du token
-        await tokenService.setToken(result.token);
-        
+        await tokenService.setToken(result.access_token);
+        await tokenService.setRefreshToken(result.refresh_token);
+
         // Dispatch Redux
-        dispatch(loginSuccess(result.token));
+        dispatch(loginSuccess(result.access_token));
         
         // Réinitialisation du formulaire
         setLoginData({ phone: '', password: '' });

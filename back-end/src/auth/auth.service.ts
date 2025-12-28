@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class AuthService {
     info(): any {
@@ -14,11 +16,11 @@ export class AuthService {
                 role: 'Parent'
             },
         }
-        console.log("Info::fromBack"+response);
+        console.log("Info::fromBack" + response);
 
         return response;
     }
-    private users: User[] = [{ phone: "0611111111", password: "password", role: "admin" }];
+    private users: User[] = [{ phone: "0611111111", password: "password", role: "admin", refreshToken: "" }];
 
     constructor(private readonly jwtService: JwtService) { }
 
@@ -39,12 +41,76 @@ export class AuthService {
             role: user.role,
         };
 
-        const acces_token = this.jwtService.sign(payload);
+        const access_token = this.jwtService.sign(payload, {
+            secret: 'ACCESS_SECRET',
+            expiresIn: '2m',
+        });
+
+        const refresh_token = this.jwtService.sign(payload, {
+            secret: 'REFRESH_SECRET',
+            expiresIn: '5m',
+        });
+        const hashed = bcrypt.hash(refresh_token, 10);
+
+        // on le garde côté serveur
+        user.refreshToken = hashed;
+
         const response = {
             message: "Connexion reussie",
-            acces_token,
+            access_token,
+            refresh_token,
+
         }
+
         console.log(response);
         return response;
     }
+
+    async refresh(refreshToken: string) {
+        try {
+            // 1️⃣ Vérifier la signature
+            const payload = this.jwtService.verify(refreshToken, {
+                secret: 'REFRESH_SECRET',
+            });
+
+            // 2️⃣ Retrouver l’utilisateur
+            const user = this.users.find(u => u.phone === payload.phone);
+            if (!user || !user.refreshToken) {
+                throw new Error();
+            }
+
+            // 3️⃣ Vérifier que le refresh token correspond à celui stocké
+            const isValid = await bcrypt.compare(
+                refreshToken,
+                user.refreshToken,
+            );
+            if (!isValid) {
+                throw new Error();
+            }
+
+            // 4️⃣ Générer nouveaux tokens (ROTATION)
+            const newAccessToken = this.jwtService.sign(payload, {
+                secret: 'ACCESS_SECRET',
+                expiresIn: '15m',
+            });
+
+            const newRefreshToken = this.jwtService.sign(payload, {
+                secret: 'REFRESH_SECRET',
+                expiresIn: '7d',
+            });
+
+            // 5️⃣ Mettre à jour le refresh token stocké
+            user.refreshToken = await bcrypt.hash(newRefreshToken, 10);
+
+            return {
+                access_token: newAccessToken,
+                refresh_token: newRefreshToken,
+            };
+
+        } catch {
+            console.log("Erreur lors de refresh token");
+        }
+    }
+
+
 }

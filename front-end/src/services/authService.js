@@ -14,7 +14,8 @@ const authService = {
       
       return {
         success: true,
-        token: response.data.acces_token,
+        access_token: response.data.access_token,
+        refresh_token:response.data.refresh_token,
         message: response.data.message,
         data: response.data,
       };
