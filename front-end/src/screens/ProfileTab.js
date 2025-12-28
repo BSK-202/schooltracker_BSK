@@ -2,9 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity,Alert } from 'react-native';
 import ProfileTabStyles from '../styles/ProfileTabStyles';
 
-export default function ProfileTab({ setIsLoggedIn ,userData}) {
-  
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/Authslice';
 
+export default function ProfileTab({userData}) {
+  const dispatch = useDispatch();
+  
+ 
   const handleLogout = () => {
     Alert.alert(
       'Déconnexion',
@@ -13,11 +17,12 @@ export default function ProfileTab({ setIsLoggedIn ,userData}) {
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'Se déconnecter',
-          onPress: () => setIsLoggedIn(false)
+          onPress: () => dispatch(logout())
         }
       ]
     );
   };
+  
   return (
     <View style={ProfileTabStyles.container}>
       <View style={ProfileTabStyles.header}>

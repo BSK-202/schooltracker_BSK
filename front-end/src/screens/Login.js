@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-
+import { loginSuccess,logout } from '../redux/Authslice';
+import { useDispatch } from 'react-redux';
 import {
   StatusBar,
   View,
@@ -13,9 +14,10 @@ import LoginStyles from '../styles/LoginStyles';
 import loginAPI from '../APIS/loginAPI';
 import * as SecureStore from 'expo-secure-store';
 
-export default function Login({ navigation, setIsLoggedIn }) {
+export default function Login({ navigation}) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
 
   const handleLogin = async () => {
 
@@ -24,12 +26,13 @@ export default function Login({ navigation, setIsLoggedIn }) {
       const response = await loginAPI.post("/auth/login", { phone, password });
 
       if (response.data.message === "Connexion reussie") {
-        setIsLoggedIn(true);
         let token = response.data.acces_token;
         console.log("TokenBACK:" + token);
+      
 
-        // tockage sécurisé du JWT
+        // stockage sécurisé du JWT
         await SecureStore.setItemAsync("acces_token", token);
+        dispatch(loginSuccess(token));
         console.log("Token stored in SecureStore (setItemAsync done)");
 
         const storedToken = await SecureStore.getItemAsync("acces_token");
@@ -39,6 +42,7 @@ export default function Login({ navigation, setIsLoggedIn }) {
 
     } catch (error) {
       Alert.alert("Erreur", "Phone ou password incorrect");
+      dispatch(logout());
     }
   };
 
