@@ -1,49 +1,21 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert } from 'react-native'; // Ajoutez ceci
+import { Alert } from 'react-native'; 
 
 import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
 import ProfileTab from './ProfileTab';
 import TabStyles from '../styles/TabStyles';
 import authApi from '../APIS/authApi';
+import { useProfile } from '../hooks/useProfile';
 const Tab = createBottomTabNavigator();
 
-export default function Home({ setIsLoggedIn }) {
-  const [userData, setUserData] = useState({
-    name: '',
-    phone: '',
-    child: '',
-    bus: '',
-    role: ''
-  });
-
-  const getInfo = async () => {
-    try {
-
-      /* const token = await SecureStore.getItemAsync("acces_token");
-      console.log("JWT: ", token);
-
-      const response = await loginAPI.get(
-        "/auth/profil",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      setUserData(response.data.profil)
-      console.log(response.data.profil) */
-      const response = await authApi.get("/auth/profil");
-      setUserData(response.data.profil)
-      console.log(response.data.profil)
-
-    } catch (error) {
-
-      Alert.alert("Erreur", "Erreur lors de recuperation d infos");
-    }
-
-  };
+export default function Home() {
+  
+ const {
+   getInfo
+  } = useProfile();
 
   return (
     <Tab.Navigator
@@ -80,7 +52,7 @@ export default function Home({ setIsLoggedIn }) {
           getInfo();
         },
       }}>
-        {() => <ProfileTab setIsLoggedIn={setIsLoggedIn} userData={userData} />}
+        {() => <ProfileTab userData={ getInfo()} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
