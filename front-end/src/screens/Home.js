@@ -2,17 +2,12 @@ import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Alert } from 'react-native'; // Ajoutez ceci
-import loginAPI from '../APIS/loginAPI';
-// Ajoutez cet import
-import * as SecureStore from 'expo-secure-store';
-// Import des écrans d'onglets
+
 import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
 import ProfileTab from './ProfileTab';
-
-// Import des styles
 import TabStyles from '../styles/TabStyles';
-
+import authApi from '../APIS/authApi';
 const Tab = createBottomTabNavigator();
 
 export default function Home({ setIsLoggedIn }) {
@@ -26,7 +21,8 @@ export default function Home({ setIsLoggedIn }) {
 
   const getInfo = async () => {
     try {
-      const token = await SecureStore.getItemAsync("acces_token");
+
+      /* const token = await SecureStore.getItemAsync("acces_token");
       console.log("JWT: ", token);
 
       const response = await loginAPI.get(
@@ -36,6 +32,9 @@ export default function Home({ setIsLoggedIn }) {
             Authorization: `Bearer ${token}`
           }
         });
+      setUserData(response.data.profil)
+      console.log(response.data.profil) */
+      const response = await authApi.get("/auth/profil");
       setUserData(response.data.profil)
       console.log(response.data.profil)
 
