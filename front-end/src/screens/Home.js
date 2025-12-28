@@ -1,21 +1,35 @@
-import React, { useState } from 'react';
+// screens/Home.js
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert } from 'react-native'; 
 
 import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
 import ProfileTab from './ProfileTab';
 import TabStyles from '../styles/TabStyles';
-import authApi from '../APIS/authApi';
 import { useProfile } from '../hooks/useProfile';
+
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
-  
- const {
-   getInfo
+  const {
+    userData,
+    loading,
+    fetchProfileOnce
   } = useProfile();
+
+  // Option 1: Charger au montage du composant
+  useEffect(() => {
+    console.log('Chargement du profil au montage...');
+    fetchProfileOnce();
+  }, [fetchProfileOnce]);
+
+  // OU Option 2: Gérer le rechargement manuel
+  const handleProfileTabFocus = () => {
+    console.log('Onglet Profil focus');
+    // Vous pouvez choisir de recharger ou non
+    // fetchProfileOnce();
+  };
 
   return (
     <Tab.Navigator
@@ -40,19 +54,29 @@ export default function Home() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Accueil">
-        {() => <HomeTab />}
-      </Tab.Screen>
-      <Tab.Screen name="Suivi">
-        {() => <TrackingTab />}
-      </Tab.Screen>
-      <Tab.Screen name="Profil" listeners={{
-        tabPress: e => {
-          console.log('TabProfil  cliqué');
-          getInfo();
-        },
-      }}>
-        {() => <ProfileTab userData={ getInfo()} />}
+      <Tab.Screen 
+        name="Accueil" 
+        component={HomeTab}
+      />
+      
+      <Tab.Screen 
+        name="Suivi" 
+        component={TrackingTab}
+      />
+      
+      <Tab.Screen 
+        name="Profil"
+        listeners={{
+          tabPress: handleProfileTabFocus,
+        }}
+      >
+        {() => (
+          <ProfileTab 
+            userData={userData}
+            loading={loading}
+            onRefresh={fetchProfileOnce}
+          />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
   );

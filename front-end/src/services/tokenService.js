@@ -25,5 +25,14 @@ export const tokenService = {
       return null;
     }
   },
-  
+   clearAll: async () => {
+    try {
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      //await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      //await SecureStore.deleteItemAsync(USER_DATA_KEY);
+      console.log('All authentication data cleared');
+    } catch (error) {
+      console.error('Error clearing all data:', error);
+    }
+  },
 };

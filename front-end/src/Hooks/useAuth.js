@@ -81,11 +81,8 @@ export const useAuth = () => {
     try {
       setLoading(true);
       
-      // Appel API de déconnexion (optionnel)
-      await authService.logout();
-      
       // Suppression du token local
-      await tokenService.removeToken();
+      await tokenService.clearAll();
       
       // Déconnexion Redux
       dispatch(logout());

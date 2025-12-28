@@ -35,15 +35,6 @@ const authService = {
   },
 
 
-  logout: async () => {
-    try {
-      // Appel API de déconnexion si nécessaire
-      // await apiClient.post('/auth/logout');
-      return { success: true, message: 'Déconnexion réussie' };
-    } catch (error) {
-      console.error('Auth Service - Logout error:', error);
-      throw error;
-    }
-  },
+
 };
 export default authService;
