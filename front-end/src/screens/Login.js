@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginSuccess,logout } from '../redux/Authslice';
+import { loginSuccess, logout } from '../redux/Authslice';
 import { useDispatch } from 'react-redux';
 import {
   StatusBar,
@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import Input from '../components/Input';
 import LoginStyles from '../styles/LoginStyles';
-import loginAPI from '../APIS/loginAPI';
-import * as SecureStore from 'expo-secure-store';
 
-export default function Login({ navigation}) {
+import * as SecureStore from 'expo-secure-store';
+import loginApi from '../APIS/loginApi';
+export default function Login({ navigation }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
@@ -23,12 +23,15 @@ export default function Login({ navigation}) {
 
     try {
 
-      const response = await loginAPI.post("/auth/login", { phone, password });
+      console.log("avant appel APIlogin:");
+
+      const response = await loginApi.post("/auth/login", { phone, password });
+      console.log("apres appel APIlogin:");
 
       if (response.data.message === "Connexion reussie") {
         let token = response.data.acces_token;
         console.log("TokenBACK:" + token);
-      
+
 
         // stockage sécurisé du JWT
         await SecureStore.setItemAsync("acces_token", token);
@@ -41,7 +44,15 @@ export default function Login({ navigation}) {
       }
 
     } catch (error) {
-      Alert.alert("Erreur", "Phone ou password incorrect");
+      console.log("erreur lors appel APIlogin:");
+      console.log("erreur lors appel APIlogin:");
+      // Ajoute ces logs pour debugger :
+      console.error("Erreur complète:", error);
+      console.error("Status:", error.response?.status);
+      console.error("Data:", error.response?.data);
+      console.error("URL:", error.config?.url);
+
+      Alert.alert("Erreur", "hello Phone ou password incorrect");
       dispatch(logout());
     }
   };
