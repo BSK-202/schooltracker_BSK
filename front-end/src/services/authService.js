@@ -7,10 +7,7 @@ const authService = {
   login: async (phone, password) => {
     try {
       const response = await loginApi.post('/auth/login', { phone, password });
-      
-      if (response.data.message !== "Connexion reussie") {
-        throw new Error(response.data.message || 'Erreur de connexion');
-      }
+
       
       return {
         success: true,
