@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as SecureStore from 'expo-secure-store';
 import API_BASE_URL from "../config/baseUrl";
+import { tokenService } from "../services/tokenService";
 
 const authApi = axios.create({
     baseURL: API_BASE_URL,
@@ -12,7 +13,7 @@ const authApi = axios.create({
 
 authApi.interceptors.request.use(
     async(config) =>{
-        const token = await SecureStore.getItemAsync('acces_token');
+        const token = await tokenService.getToken();
         if(token){
             config.headers.Authorization= `Bearer ${token}`;
         }

@@ -42,9 +42,7 @@ export const useProfile = () => {
     }
   }, []);
 
-  // Récupérer les infos une seule fois au montage
   const fetchProfileOnce = useCallback(async () => {
-    // Ne récupérer que si pas déjà chargé
     if (!userData.name && !loading) {
       return await getInfo();
     }
@@ -52,18 +50,14 @@ export const useProfile = () => {
   }, [userData, loading, getInfo]);
 
   return {
-    // Données
     userData,
     
-    // État
     loading,
     error,
     
-    // Méthodes
     getInfo,
     fetchProfileOnce,
     
-    // Setters
     setUserData,
   };
 };

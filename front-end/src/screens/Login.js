@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }) {
   const onLoginPress = async () => {
     const result = await handleLogin();
     
-    if (!result.success) {
+    if (result && !result.success) {
       // Affichage d'alerte avec des informations détaillées
       Alert.alert(
         'Erreur de connexion',

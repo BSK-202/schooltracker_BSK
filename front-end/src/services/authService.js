@@ -7,14 +7,12 @@ const authService = {
   login: async (phone, password) => {
     try {
       const response = await loginApi.post('/auth/login', { phone, password });
-      
-      if (response.data.message !== "Connexion reussie") {
-        throw new Error(response.data.message || 'Erreur de connexion');
-      }
+
       
       return {
         success: true,
-        token: response.data.acces_token,
+        access_token: response.data.access_token,
+        refresh_token:response.data.refresh_token,
         message: response.data.message,
         data: response.data,
       };
