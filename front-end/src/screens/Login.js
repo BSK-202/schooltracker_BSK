@@ -1,59 +1,40 @@
-import React, { useState } from 'react';
-import { loginSuccess, logout } from '../redux/Authslice';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import {
   StatusBar,
   View,
   Text,
   ImageBackground,
   TouchableOpacity,
-  Alert
+  Alert,
 } from 'react-native';
 import Input from '../components/Input';
 import LoginStyles from '../styles/LoginStyles';
-
-import * as SecureStore from 'expo-secure-store';
-import loginApi from '../APIS/loginApi';
-export default function Login({ navigation }) {
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const dispatch = useDispatch();
-
-  const handleLogin = async () => {
-
-    try {
-
-      console.log("avant appel APIlogin:");
-
-      const response = await loginApi.post("/auth/login", { phone, password });
-      console.log("apres appel APIlogin:");
-
-      if (response.data.message === "Connexion reussie") {
-        let token = response.data.acces_token;
-        console.log("TokenBACK:" + token);
+import { useAuth } from '../hooks/useAuth';
 
 
-        // stockage sécurisé du JWT
-        await SecureStore.setItemAsync("acces_token", token);
-        dispatch(loginSuccess(token));
-        console.log("Token stored in SecureStore (setItemAsync done)");
+export default function LoginScreen({ navigation }) {
+  const {
+    phone,
+    setPhone,
+    password,
+    setPassword,
+    loading,
+    error,
+    handleLogin,
+  } = useAuth();
 
-        const storedToken = await SecureStore.getItemAsync("acces_token");
-        console.log("TokenFront: " + storedToken);
-
-      }
-
-    } catch (error) {
-      console.log("erreur lors appel APIlogin:");
-      console.log("erreur lors appel APIlogin:");
-      // Ajoute ces logs pour debugger :
-      console.error("Erreur complète:", error);
-      console.error("Status:", error.response?.status);
-      console.error("Data:", error.response?.data);
-      console.error("URL:", error.config?.url);
-
-      Alert.alert("Erreur", "hello Phone ou password incorrect");
-      dispatch(logout());
+  const onLoginPress = async () => {
+    const result = await handleLogin();
+    
+    if (!result.success) {
+      // Affichage d'alerte avec des informations détaillées
+      Alert.alert(
+        'Erreur de connexion',
+        result.error || 'Une erreur est survenue',
+        [{ text: 'OK', style: 'cancel' }]
+      );
+    } else {
+       navigation.navigate('Home');
     }
   };
 
@@ -67,6 +48,7 @@ export default function Login({ navigation }) {
 
       <View style={LoginStyles.overlay}>
         <View style={LoginStyles.contentContainer}>
+          {/* Header */}
           <View style={LoginStyles.header}>
             <Text style={LoginStyles.welcomeText}>Welcome to School Tracker!</Text>
             <Text style={LoginStyles.subtitle}>
@@ -74,46 +56,70 @@ export default function Login({ navigation }) {
             </Text>
           </View>
 
+          {/* Formulaire */}
           <View style={LoginStyles.formContainer}>
+            {/* Champ téléphone */}
             <View style={LoginStyles.inputContainer}>
               <Input
-                placeholder='Saisissez votre numéro de téléphone'
-                keyboardType='phone-pad'
+                placeholder="Saisissez votre numéro de téléphone"
+                keyboardType="phone-pad"
                 icon="call-outline"
                 value={phone}
                 onChangeText={setPhone}
+                editable={!loading}
               />
             </View>
 
+            {/* Champ mot de passe */}
             <View style={LoginStyles.inputContainer}>
               <Input
-                placeholder='Saisissez votre mot de passe'
-                keyboardType='default'
+                placeholder="Saisissez votre mot de passe"
+                keyboardType="default"
                 secureTextEntry={true}
                 icon="lock-closed-outline"
                 value={password}
                 onChangeText={setPassword}
+                editable={!loading}
               />
             </View>
 
+            {/* Affichage des erreurs */}
+            {error && (
+              <View style={LoginStyles.errorContainer}>
+                <Text style={LoginStyles.errorText}>{error}</Text>
+              </View>
+            )}
+
+            {/* Bouton de connexion */}
             <View style={LoginStyles.buttonContainer}>
               <TouchableOpacity
-                style={LoginStyles.loginButton}
-                onPress={handleLogin}
+                style={[
+                  LoginStyles.loginButton,
+                  loading && LoginStyles.loginButtonDisabled,
+                ]}
+                onPress={onLoginPress}
+                disabled={loading}
               >
-                <Text style={LoginStyles.loginButtonText}>Se connecter</Text>
+                <Text style={LoginStyles.loginButtonText}>
+                  {loading ? 'Connexion en cours...' : 'Se connecter'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
 
+          {/* Footer */}
           <View style={LoginStyles.footer}>
-            <TouchableOpacity>
+            <TouchableOpacity disabled={loading}>
               <Text style={LoginStyles.forgotPassword}>Mot de passe oublié ?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Signup')}
+              disabled={loading}
+            >
               <Text style={LoginStyles.signupText}>
-                Pas encore de compte ? <Text style={LoginStyles.signupLink}>S'inscrire</Text>
+                Pas encore de compte ?{' '}
+                <Text style={LoginStyles.signupLink}>S'inscrire</Text>
               </Text>
             </TouchableOpacity>
           </View>

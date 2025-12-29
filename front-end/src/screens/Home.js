@@ -1,48 +1,35 @@
-import React, { useState } from 'react';
+// screens/Home.js
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert } from 'react-native'; // Ajoutez ceci
 
 import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
 import ProfileTab from './ProfileTab';
 import TabStyles from '../styles/TabStyles';
-import authApi from '../APIS/authApi';
+import { useProfile } from '../hooks/useProfile';
+
+
+
 const Tab = createBottomTabNavigator();
 
-export default function Home({ setIsLoggedIn }) {
-  const [userData, setUserData] = useState({
-    name: '',
-    phone: '',
-    child: '',
-    bus: '',
-    role: ''
-  });
+export default function Home() {
+  const {
+    userData,
+    loading,
+    fetchProfileOnce
+  } = useProfile();
 
-  const getInfo = async () => {
-    try {
+  // Option 1: Charger au montage du composant
+  useEffect(() => {
+    console.log('Chargement du profil au montage...');
+    fetchProfileOnce();
+  }, [fetchProfileOnce]);
 
-      /* const token = await SecureStore.getItemAsync("acces_token");
-      console.log("JWT: ", token);
-
-      const response = await loginAPI.get(
-        "/auth/profil",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      setUserData(response.data.profil)
-      console.log(response.data.profil) */
-      const response = await authApi.get("/auth/profil");
-      setUserData(response.data.profil)
-      console.log(response.data.profil)
-
-    } catch (error) {
-
-      Alert.alert("Erreur", "Erreur lors de recuperation d infos");
-    }
-
+  // OU Option 2: Gérer le rechargement manuel
+  const handleProfileTabFocus = () => {
+    console.log('Onglet Profil focus');
+  
   };
 
   return (
@@ -68,19 +55,29 @@ export default function Home({ setIsLoggedIn }) {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Accueil">
-        {() => <HomeTab />}
-      </Tab.Screen>
-      <Tab.Screen name="Suivi">
-        {() => <TrackingTab />}
-      </Tab.Screen>
-      <Tab.Screen name="Profil" listeners={{
-        tabPress: e => {
-          console.log('TabProfil  cliqué');
-          getInfo();
-        },
-      }}>
-        {() => <ProfileTab setIsLoggedIn={setIsLoggedIn} userData={userData} />}
+      <Tab.Screen 
+        name="Accueil" 
+        component={HomeTab}
+      />
+      
+      <Tab.Screen 
+        name="Suivi" 
+        component={TrackingTab}
+      />
+      
+      <Tab.Screen 
+        name="Profil"
+        listeners={{
+          tabPress: handleProfileTabFocus,
+        }}
+      >
+        {() => (
+          <ProfileTab 
+            userData={userData}
+            loading={loading}
+            onRefresh={fetchProfileOnce}
+          />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
   );
