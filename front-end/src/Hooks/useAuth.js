@@ -20,9 +20,14 @@ export const useAuth = () => {
       setError('Le numéro de téléphone et le mot de passe sont requis');
       return { success: false, error: 'Champs requis manquants' };
     }
-    const { phone, password } = loginData;
 
-    return dispatch(loginUser({ phone, password }));
+    try{
+          const { phone, password } = loginData;
+          return dispatch(loginUser({ phone, password })).unwrap();
+    } 
+    catch(err){
+        return { success: false, error: err };
+    }
 
   };
 

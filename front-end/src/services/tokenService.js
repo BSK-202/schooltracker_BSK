@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import loginApi from '../APIS/loginApi';
+import loginApi from '../APIS/loginAPI';
 
 const TOKEN_KEY = 'acces_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';

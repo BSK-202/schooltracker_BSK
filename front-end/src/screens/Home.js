@@ -9,6 +9,8 @@ import ProfileTab from './ProfileTab';
 import TabStyles from '../styles/TabStyles';
 import { useProfile } from '../hooks/useProfile';
 
+
+
 const Tab = createBottomTabNavigator();
 
 export default function Home() {
@@ -27,8 +29,7 @@ export default function Home() {
   // OU Option 2: Gérer le rechargement manuel
   const handleProfileTabFocus = () => {
     console.log('Onglet Profil focus');
-    // Vous pouvez choisir de recharger ou non
-    // fetchProfileOnce();
+  
   };
 
   return (

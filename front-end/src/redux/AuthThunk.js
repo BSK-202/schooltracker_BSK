@@ -3,11 +3,11 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../redux/Authslice';
 import { tokenService } from '../services/tokenService';
 import authService from '../services/authService';
-import { createAsyncThunk, isRejectedWithValue } from '@reduxjs/toolkit';
+import { createAsyncThunk, rejectWithValue } from '@reduxjs/toolkit';
 
 export const loginUser = createAsyncThunk(
     "auth/login",
-    async ({ phone, password }, { rejectedWithValue }) => {
+    async ({ phone, password }, { rejectWithValue }) => {
         try {
 
             const result = await authService.login(phone, password);
@@ -26,11 +26,11 @@ export const loginUser = createAsyncThunk(
                 };
             }
             else {
-                return rejectedWithValue("Identifiants incorrects")
+                return rejectWithValue("Identifiants incorrects")
             }
 
         } catch (err) {
-            return rejectedWithValue(err.message || "Erreur de connexion");
+            return rejectWithValue(err.message || "Erreur de connexion");
         }
     }
 );
