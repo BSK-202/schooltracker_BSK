@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
-import { User } from './user.entity';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { User } from './dto/signup.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
+        constructor(
+            private readonly jwtService: JwtService,
+            private readonly userService: UserService
+        ) { }
+
     info(): any {
         const response = {
             message: "Info recupere avec succes",
@@ -20,9 +26,9 @@ export class AuthService {
 
         return response;
     }
-    private users: User[] = [{ phone: "0611111111", password: "password", role: "admin", refreshToken: "" }];
+    private users: User[] = [{ phone: "0611111111", password: "password", full_name: "Mohamed Ali", role: "admin", refreshToken: "" }];
 
-    constructor(private readonly jwtService: JwtService) { }
+   
 
     login(body: { phone: string, password: string }): any {
         if (!body.phone || !body.password) {
@@ -112,5 +118,18 @@ export class AuthService {
         }
     }
 
-
+    async register(body:User){
+        const {phone, password, full_name, role} = body;
+        const existingUser = await this.userService.findByPhone(phone);
+        if(existingUser){
+            throw new ConflictException('Phone number already in use');
+        }
+        await this.userService.create({
+            phone,
+            password,
+            full_name,
+            role
+        });
+        return {message: "User created successfully"};
+    }
 }

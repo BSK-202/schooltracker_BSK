@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from './dto/signup.dto';
 
 
 @Controller('auth')
@@ -25,6 +26,12 @@ export class AuthController {
     info() {
         console.log("controller profil");
         return this.authService.info();
+    }
+
+    @Post('register')
+    register(@Body() body:User) {
+        let message = this.authService.register(body);
+        return message;
     }
 
 }
