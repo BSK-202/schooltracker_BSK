@@ -1,6 +1,6 @@
 
 import authApi from '../APIS/authApi';
-import loginApi from '../APIS/loginApi'
+import loginApi from '../APIS/loginAPI'
 import { logout } from '../redux/Authslice';
 const authService = {
 
