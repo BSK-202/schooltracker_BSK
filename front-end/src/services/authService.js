@@ -22,17 +22,5 @@ const authService = {
     }
   },
 
-   profile: async () => {
-    try {
-      const response = await authApi.get('/auth/profil');
-      return response;
-    } catch (error) {
-      console.error('auth Service - profil error:', error);
-      throw error;
-    }
-  },
-
-
-
 };
 export default authService;
