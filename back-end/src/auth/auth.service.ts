@@ -30,7 +30,7 @@ export class AuthService {
 
    
 
-    login(body: { phone: string, password: string }): any {
+    async login(body: { phone: string, password: string }): Promise<any> {
         if (!body.phone || !body.password) {
             return "Email or password is missing";
         }
@@ -56,7 +56,7 @@ export class AuthService {
             secret: 'REFRESH_SECRET',
             expiresIn: '5m',
         });
-        const hashed = bcrypt.hash(refresh_token, 10);
+        const hashed = await bcrypt.hash(refresh_token, 10);
 
         // on le garde côté serveur
         user.refreshToken = hashed;
