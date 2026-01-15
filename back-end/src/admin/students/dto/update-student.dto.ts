@@ -26,4 +26,9 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsInt()
   stopId?: number;
+
+    // AJOUTER CE CHAMP OPTIONNEL POUR LA MISE À JOUR
+  @IsOptional()
+  @IsInt()
+  busId?: number;
 }

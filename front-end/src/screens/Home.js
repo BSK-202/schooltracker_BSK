@@ -1,4 +1,3 @@
-// screens/Home.js
 import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,16 +19,26 @@ export default function Home() {
     fetchProfileOnce
   } = useProfile();
 
-  // Option 1: Charger au montage du composant
-  useEffect(() => {
-    console.log('Chargement du profil au montage...');
-    fetchProfileOnce();
-  }, [fetchProfileOnce]);
+  // CORRECTION: Utilisez un état pour éviter la boucle
+  const [profileLoaded, setProfileLoaded] = React.useState(false);
 
-  // OU Option 2: Gérer le rechargement manuel
+  useEffect(() => {
+    if (!profileLoaded && !loading) {
+      console.log('Chargement du profil au montage...');
+      fetchProfileOnce().then(() => {
+        setProfileLoaded(true);
+      }).catch(error => {
+        console.error('Erreur chargement profil:', error);
+      });
+    }
+  }, [profileLoaded, loading, fetchProfileOnce]);
+
+  // OU mieux: simplifiez complètement
   const handleProfileTabFocus = () => {
     console.log('Onglet Profil focus');
-  
+    if (!loading) {
+      fetchProfileOnce();
+    }
   };
 
   return (

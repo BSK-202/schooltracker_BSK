@@ -13,6 +13,7 @@ import { School } from '../../schools/entities/school.entity';
 import { Driver } from '../../drivers/entities/driver.entity';
 import { Trajet } from '../../trajets/entities/trajet.entity';
 import { Stop } from '../../stops/entities/stop.entity'; // AJOUTER CET IMPORT
+import { Student } from 'src/admin/students/entities/student.entity';
 
 @Entity('bus')
 export class Bus {
@@ -44,4 +45,7 @@ export class Bus {
 
   @OneToMany(() => Trajet, (trajet) => trajet.bus)
   trajets: Trajet[];
+
+  @OneToMany(() => Student, (student) => student.bus)
+  students: Student[];
 }

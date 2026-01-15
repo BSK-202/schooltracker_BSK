@@ -21,6 +21,10 @@ import { Student } from './admin/students/entities/student.entity';
 import { Parent } from './admin/parents/entities/parent.entity';
 import { ParentsModule } from './admin/parents/parents.module';
 import { StudentsModule } from './admin/students/students.module';
+import { TrackingModule } from './tracking/tracking.module';
+import { SimulationModule } from './simulation/simulation.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationToken } from './notifications/entities/notification-token.entity';
 
 @Module({
   imports: [
@@ -31,9 +35,9 @@ import { StudentsModule } from './admin/students/students.module';
        username: 'postgres',
        password: '5678',
        database: 'db_schoolTracker',
-       entities: [User,School,Bus,Driver,Trajet,Stop,TrajetStop,Student,Parent],
+       entities: [User,School,Bus,Driver,Trajet,Stop,TrajetStop,Student,Parent,NotificationToken],
        synchronize: true,
-     }),AuthModule, UserModule, AdminModule,SchoolsModule,BusesModule,DriversModule,TrajetsModule,StopsModule,StudentsModule,ParentsModule],
+     }),AuthModule, UserModule, AdminModule,SchoolsModule,BusesModule,DriversModule,TrajetsModule,StopsModule,StudentsModule,ParentsModule, TrackingModule, SimulationModule, NotificationsModule],
      controllers: [AppController],
      providers: [AppService],
 })

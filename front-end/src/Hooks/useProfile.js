@@ -1,63 +1,52 @@
-// hooks/useProfile.js
 import { useState, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Alert } from 'react-native';
-import authService from "../services/authService";
+import { fetchUserProfile } from '../redux/AuthThunk';
 
 export const useProfile = () => {
-  const [userData, setUserData] = useState({
-    name: '',
-    phone: '',
-    child: '',
-    bus: '',
-    role: ''
-  });
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const dispatch = useDispatch();
+  const { profile, user } = useSelector((state) => state.auth);
 
-  // Récupérer les infos profil
+  // Récupérer les infos profil via Redux
   const getInfo = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('Récupération du profil...');
-      const response = await authService.profile();
+      console.log('Fetching profile via thunk...');
+      const result = await dispatch(fetchUserProfile()).unwrap();
       
-      console.log('Profil reçu:', response.data.profil);
-      setUserData(response.data.profil);
-      
-      return response.data.profil; // Retourner les données
+      console.log('Profile fetched:', result);
+      return result;
     } catch (error) {
-      console.error('Erreur dans getInfo:', error);
+      console.error('Error in getInfo:', error);
       setError(error.message);
       
       Alert.alert(
         "Erreur", 
         "Erreur lors de la récupération des informations"
       );
-      throw error; // Propager l'erreur
+      throw error;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dispatch]);
 
   const fetchProfileOnce = useCallback(async () => {
-    if (!userData.name && !loading) {
+    if (!profile && !loading) {
       return await getInfo();
     }
-    return userData;
-  }, [userData, loading, getInfo]);
+    return profile;
+  }, [profile, loading, getInfo]);
 
   return {
-    userData,
-    
+    userData: profile?.profil || user || {},
     loading,
     error,
-    
     getInfo,
     fetchProfileOnce,
-    
-    setUserData,
   };
 };

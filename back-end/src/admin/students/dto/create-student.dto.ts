@@ -26,4 +26,8 @@ export class CreateStudentDto {
   @IsInt()
   @IsNotEmpty({ message: "L'arrêt est obligatoire" })
   stopId: number;
+
+  @IsInt()
+  @IsNotEmpty({ message: "Le bus est obligatoire" })
+  busId: number;
 }

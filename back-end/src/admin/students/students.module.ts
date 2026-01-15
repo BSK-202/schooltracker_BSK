@@ -7,10 +7,11 @@ import { Student } from './entities/student.entity';
 import { Parent } from '../parents/entities/parent.entity';
 import { ParentsModule } from '../parents/parents.module';
 import { Stop } from '../stops/entities/stop.entity';
+import { Bus } from '../buses/entities/bus.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Student, Parent, Stop]),
+    TypeOrmModule.forFeature([Student, Parent, Stop,Bus]),
     ParentsModule
   ],
   controllers: [StudentsController],

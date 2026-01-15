@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { Parent } from '../../parents/entities/parent.entity';
 import { Stop } from 'src/admin/stops/entities/stop.entity';
+import { Bus } from 'src/admin/buses/entities/bus.entity'; // AJOUTER CET IMPORT
+
 
 @Entity('student')
 export class Student {
@@ -63,4 +65,9 @@ export class Student {
   @ManyToOne(() => Stop, { nullable: false })
   @JoinColumn({ name: 'stop_id' })
   stop: Stop;
+
+   // AJOUTER CETTE RELATION AVEC BUS (OBLIGATOIRE)
+  @ManyToOne(() => Bus, { nullable: false })
+  @JoinColumn({ name: 'bus_id' })
+  bus: Bus;
 }

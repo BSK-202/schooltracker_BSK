@@ -8,6 +8,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { Student } from '../../students/entities/student.entity';
+import { NotificationToken } from 'src/notifications/entities/notification-token.entity';
 
 @Entity('parent')
 export class Parent {
@@ -68,4 +69,8 @@ export class Parent {
 
   @OneToMany(() => Student, (student) => student.parent2)
   studentsAsParent2: Student[];
+
+  // Ajoutez cette relation pour les tokens de notification
+  @OneToMany(() => NotificationToken, (token) => token.parent)
+  notificationTokens: NotificationToken[];
 }

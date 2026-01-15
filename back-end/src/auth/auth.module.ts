@@ -1,21 +1,25 @@
-// auth.module.ts
+// src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
-import { PassportModule } from '@nestjs/passport';
-import { UserModule } from '../user/user.module'; 
+import { Parent } from '../admin/parents/entities/parent.entity';
+import { Driver } from '../admin/drivers/entities/driver.entity';
+import { Bus } from 'src/admin/buses/entities/bus.entity';
 
 @Module({
   imports: [
-    UserModule, 
+    TypeOrmModule.forFeature([Parent, Driver,Bus]), // Ajoutez Admin si nécessaire
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: 'ACCESS_SECRET',
     }),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy]
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}
