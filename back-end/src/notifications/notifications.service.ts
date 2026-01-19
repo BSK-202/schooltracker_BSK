@@ -15,33 +15,68 @@ export class NotificationsService {
     private readonly tokenRepository: Repository<NotificationToken>,
   ) {}
 
-  // 1. Enregistrer un token pour un parent
-  async registerToken(parent: Parent, pushToken: string, deviceId: string, platform: 'ios' | 'android' | 'web') {
+async registerToken(parentOrId: Parent | number, pushToken: string) {
+  try {
+    console.log('📱 Enregistrement token appelé');
+    
+    let parentId: number;
+    let parentEntity: Parent | null = null;
+    
+    // Vérifiez si c'est un ID ou un objet Parent
+    if (typeof parentOrId === 'number') {
+      parentId = parentOrId;
+      console.log('🔢 ID parent reçu:', parentId);
+    } else if (parentOrId && parentOrId.id) {
+      parentEntity = parentOrId as Parent;
+      parentId = parentEntity.id;
+      console.log('👤 Objet Parent reçu:', parentEntity.fullName, '(ID:', parentId, ')');
+    } else {
+      console.error('❌ Parent invalide:', parentOrId);
+      throw new Error('Parent invalide fourni');
+    }
+    
+    console.log('🔑 Token:', pushToken.substring(0, 20) + '...');
+    
     // Vérifier si le token existe déjà
     const existingToken = await this.tokenRepository.findOne({
       where: { pushToken },
     });
 
     if (existingToken) {
-      // Mettre à jour le parent et la date
-      existingToken.parent = parent;
+      console.log('🔄 Token existant trouvé');
+      existingToken.parent = parentEntity || { id: parentId } as Parent;
       existingToken.lastUsed = new Date();
       existingToken.isActive = true;
-      return await this.tokenRepository.save(existingToken);
+      const saved = await this.tokenRepository.save(existingToken);
+      console.log('✅ Token mis à jour avec ID:', saved.id);
+      return saved;
     }
 
-    // Créer un nouveau token - CORRIGÉ : utiliser un objet partiel
+    console.log('🆕 Création nouveau token...');
+    
+    // Créer le token
     const notificationToken = this.tokenRepository.create({
       pushToken,
-      deviceId,
-      platform,
-      parent,
+      parent: parentEntity || { id: parentId } as Parent,
       isActive: true,
       lastUsed: new Date(),
-    } as Partial<NotificationToken>);
+    });
 
-    return await this.tokenRepository.save(notificationToken);
+    console.log('📤 Token à sauvegarder:', {
+      pushToken: notificationToken.pushToken,
+      parentId: parentId
+    });
+
+    const savedToken = await this.tokenRepository.save(notificationToken);
+    console.log('✅ Token enregistré avec ID:', savedToken.id);
+    
+    return savedToken;
+  } catch (error) {
+    console.error('❌ Erreur dans registerToken:', error.message);
+    console.error('❌ Stack:', error.stack);
+    throw error;
   }
+}
 
   // 2. Désenregistrer un token
   async unregisterToken(pushToken: string) {

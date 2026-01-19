@@ -20,13 +20,26 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.fadmaikrame.schooltracker",
+      "googleServicesFile": "./google-services.json",
+       "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDoKui2FzdBfnN_UnS2aLrRUPlYKiio34I"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "91db13a3-7b59-4caf-ade3-38d707fb627a"
+      }
+    },
+    "owner": "fadmajadda"
   }
 }

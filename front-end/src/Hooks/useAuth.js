@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout, clearError } from '../redux/Authslice';
 import { tokenService } from '../services/tokenService';
 import { loginUser } from '../redux/AuthThunk';
-
+import { usePushNotifications } from './usePushNotifications';
+ 
 export const useAuth = () => {
   const [loginData, setLoginData] = useState({
     phone: '',
@@ -12,6 +13,7 @@ export const useAuth = () => {
   
   const { loading, error, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const { registerPushTokenAfterLogin } = usePushNotifications();
 
   const handleLogin = async () => {
     // Validation
@@ -27,6 +29,9 @@ export const useAuth = () => {
 
     try {
       const result = await dispatch(loginUser(loginData)).unwrap();
+      setTimeout(() => {
+        registerPushTokenAfterLogin();
+      }, 500);
       return result;
     } catch (err) {
       console.error('Login error:', err);

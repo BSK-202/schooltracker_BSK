@@ -8,7 +8,8 @@ import {
   Request, 
   Get,
   Param,
-  Put 
+  Put, 
+  BadRequestException
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -23,37 +24,52 @@ import { NotificationToken } from './entities/notification-token.entity';
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @ApiOperation({ summary: 'Enregistrer un token de notification' })
-  @UseGuards(AuthGuard('jwt'))
-  @Post('register-token')
-  async registerToken(
-    @Request() req,
-    @Body() body: RegisterTokenDto,
-  ) {
-    const parent = req.user;
+// MODIFIEZ CETTE PARTIE :
+@ApiOperation({ summary: 'Enregistrer un token de notification' })
+@UseGuards(AuthGuard('jwt'))
+@Post('register-token')
+async registerToken(
+  @Request() req,
+  @Body() body: RegisterTokenDto,
+) {
+  try {
+    console.log('📨 Requête register-token reçue');
+    console.log('👤 req.user COMPLET:', req.user); // Log complet
     
-    const token = await this.notificationsService.registerToken(
-      parent,
-      body.pushToken,
-      body.deviceId,
-      body.platform, // Déjà typé correctement
-    );
-
-    // Mettre à jour les infos supplémentaires si fournies
-    if (body.appVersion || body.deviceModel || body.osVersion) {
-      await this.notificationsService.updateTokenInfo(body.pushToken, {
-        appVersion: body.appVersion,
-        deviceModel: body.deviceModel,
-        osVersion: body.osVersion,
-      } as Partial<NotificationToken>);
+    // CORRECTION ICI : Utilisez req.user.userId au lieu de req.user.id
+    if (!req.user || !req.user.userId) {
+      console.error('❌ req.user invalide (pas de userId):', req.user);
+      throw new BadRequestException('Utilisateur non authentifié');
     }
 
+    // Affichez les bonnes infos
+    console.log(`✅ Utilisateur authentifié:`, {
+      userId: req.user.userId,
+      phone: req.user.phone,
+      role: req.user.role,
+      fullName: req.user.full_name || req.user.fullName // Les deux possibles
+    });
+    
+    console.log('🔑 Token reçu:', body.pushToken.substring(0, 20) + '...');
+    
+    // CORRECTION : Passez le userId au service
+    const token = await this.notificationsService.registerToken(
+      req.user.userId,  // <-- Passez userId directement
+      body.pushToken
+    );
+
+    console.log('✅ Token enregistré avec succès');
+    
     return {
       success: true,
       message: 'Token enregistré avec succès',
       token,
     };
+  } catch (error) {
+    console.error('❌ Erreur dans registerToken controller:', error.message);
+    throw error;
   }
+}
 
   @ApiOperation({ summary: 'Désenregistrer un token' })
   @UseGuards(AuthGuard('jwt'))

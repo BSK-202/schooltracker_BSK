@@ -18,15 +18,6 @@ export class NotificationToken {
   @Column({ unique: true })
   pushToken: string;
 
-  @Column({ name: 'device_id' })
-  deviceId: string;
-
-  @Column({ 
-    type: 'varchar',
-    length: 20 
-  })
-  platform: 'ios' | 'android' | 'web';
-
   @ManyToOne(() => Parent, parent => parent.notificationTokens, { 
     nullable: false,
     onDelete: 'CASCADE' // Supprimer les tokens si le parent est supprimé
@@ -47,23 +38,4 @@ export class NotificationToken {
     nullable: true 
   })
   lastUsed: Date;
-
-  // Optionnel : ajouter d'autres informations utiles
-  @Column({ 
-    name: 'app_version',
-    nullable: true 
-  })
-  appVersion: string;
-
-  @Column({ 
-    name: 'device_model',
-    nullable: true 
-  })
-  deviceModel: string;
-
-  @Column({ 
-    name: 'os_version',
-    nullable: true 
-  })
-  osVersion: string;
 }

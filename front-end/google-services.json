@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "857799721097",
+    "project_id": "front-end-201dc",
+    "storage_bucket": "front-end-201dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:857799721097:android:1e981144466566649bc658",
+        "android_client_info": {
+          "package_name": "com.fadmaikrame.schooltracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGBTQl9mYl7XJvEWW6L_YNSUn7YM3zrfI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

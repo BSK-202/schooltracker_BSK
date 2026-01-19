@@ -124,7 +124,7 @@ export class AuthService {
 
     const refresh_token = this.jwtService.sign(payload, {
       secret: 'REFRESH_SECRET',
-      expiresIn: '5m',
+      expiresIn: '60m',
     });
 
     // 7. Hasher et stocker le refresh token (comme dans votre code actuel)
