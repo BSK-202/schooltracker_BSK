@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { io } from 'socket.io-client';
 import API_BASE_URL from "../config/baseUrl";
-import { getRealisticRoute } from '../services/routeService'; // <-- AJOUTEZ CETTE LIGNE
+import { getRealisticRoute } from '../services/routeService';
 import * as Notifications from 'expo-notifications';
 
 export const useBusSimulation = () => {
@@ -14,6 +14,7 @@ export const useBusSimulation = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [simulationSpeed, setSimulationSpeed] = useState(1);
+  const [nextStopInfo, setNextStopInfo] = useState(null); // AJOUTER CET ÉTAT
   
   const socketRef = useRef(null);
   const currentBusIdRef = useRef(null);
@@ -57,7 +58,6 @@ export const useBusSimulation = () => {
         setIsSimulationActive(false);
         
         if (reason === 'io server disconnect') {
-          // Reconnexion manuelle
           setTimeout(() => {
             console.log('🔄 Tentative de reconnexion...');
             connect();
@@ -123,19 +123,30 @@ export const useBusSimulation = () => {
         setIsSimulationActive(false);
         setBusPosition(null);
         setSimulationStatus(null);
+        setNextStopInfo(null); // Réinitialiser
         setSimulationSpeed(1);
         currentBusIdRef.current = null;
       });
 
-      // Arrêt du bus
-      socketRef.current.on('bus-stop', (data) => {
-        console.log('🛑 Bus à l\'arrêt:', data);
-        Alert.alert(
-          'Arrêt du bus',
-          `Le bus s'est arrêté à ${data.isSchool ? 'l\'école' : 'un arrêt'}`,
-          [{ text: 'OK' }]
-        );
-      });
+     // Remplacer l'écouteur bus-stop existant par:
+socketRef.current.on('bus-stop', (data) => {
+  console.log('🛑 Bus à l\'arrêt:', data);
+  
+  // Si c'est l'arrêt enfant, ne PAS afficher d'alerte générique
+  // car une notification personnalisée sera déjà affichée via 'scheduled-notification'
+  if (!data.isChildStop) {
+    Alert.alert(
+      'Arrêt du bus',
+      `Le bus s'est arrêté à ${data.isSchool ? 'l\'école' : 'un arrêt'}`,
+      [{ text: 'OK' }]
+    );
+  }
+  
+  // MAIS on peut quand même logger
+  if (data.isChildStop) {
+    console.log(`👨‍👦 Arrêt enfant: ${data.childName}`);
+  }
+});
 
       // Bus arrivé
       socketRef.current.on('bus-arrived', (data) => {
@@ -158,35 +169,127 @@ export const useBusSimulation = () => {
         console.log('⏸️ Pause changée:', data);
       });
 
-      // AJOUTER CETTE SECTION COMPLÈTE :
-
-// Notification parent reçue du serveur
-      socketRef.current.on('parent-notification', (data) => {
-        console.log('📨 Notification parent reçue:', data);
+      // Notification de temps réel
+      socketRef.current.on('time-status', (data) => {
+        console.log('🕐 Statut temporel reçu:', data);
+        setNextStopInfo(data.nextStop);
         
-        // Afficher une alerte locale
-        const alertTitle = data.title || getNotificationTitle(data.type);
-        const alertMessage = data.message || 'Nouvelle notification du bus';
-        
-        Alert.alert(
-          alertTitle,
-          alertMessage,
-          [
-            { 
-              text: 'Voir', 
-              onPress: () => {
-                // Vous pourriez naviguer vers l'écran de tracking
-                console.log('Navigation vers TrackingTab avec busId:', data.busId);
-                // Note: Vous devrez peut-être passer navigation via props
+        // Si c'est l'arrêt de l'enfant
+        if (data.nextStop?.isChildStop) {
+          console.log(`👨‍👦 Prochain arrêt EST l'arrêt enfant: ${data.nextStop.minutesUntil} min`);
+          
+          // Afficher une notification locale si < 10 min
+          if (data.nextStop.minutesUntil <= 10 && data.nextStop.minutesUntil > 0) {
+            triggerLocalNotification(
+              '👨‍👦 Arrêt enfant approche',
+              `Le bus sera à l'arrêt de votre enfant dans ${data.nextStop.minutesUntil} minutes`,
+              {
+                busId: data.busId,
+                stopId: data.nextStop.stopId,
+                minutesUntil: data.nextStop.minutesUntil,
               }
-            },
-            { text: 'OK', style: 'cancel' }
-          ]
-        );
-        
-        // Déclencher une notification push locale si disponible
-        triggerLocalNotification(alertTitle, alertMessage, data);
+            );
+          }
+        }
       });
+
+      // NOTIFICATION GÉNÉRIQUE POUR TOUTES LES NOTIFICATIONS PROGRAMMÉES
+      socketRef.current.on('scheduled-notification', (data) => {
+        console.log('📅 Notification programmée reçue:', data);
+        
+        const notificationType = data.type || 'info';
+        
+        // Gérer les différents types de notifications
+        switch (notificationType) {
+          case 'departure':
+            Alert.alert(
+              '🚌 Départ du bus',
+              `Le bus ${data.busId} vient de partir`,
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case 'child_minutes_before':
+            Alert.alert(
+              `👨‍👦 ${data.minutesToStop} min avant`,
+              data.message || `Le bus sera à l'arrêt de votre enfant dans ${data.minutesToStop} minutes`,
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case 'child_5min_before':
+            Alert.alert(
+              '🕐 Bus en approche',
+              data.message || 'Le bus sera à l\'arrêt de votre enfant dans 5 minutes',
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case 'child_imminent':
+            Alert.alert(
+              '📍 Arrivée imminente',
+              data.message || 'Le bus arrive à l\'arrêt de votre enfant',
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case 'child_arrival':
+            Alert.alert(
+              '✅ Arrivé à l\'arrêt',
+              data.message || `Le bus est arrivé à l'arrêt de ${data.childName || 'votre enfant'}`,
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case '5min_before_general':
+            Alert.alert(
+              '🚌 Bus en approche',
+              data.message || `Le bus sera à l'arrêt dans ${data.minutesToStop} minutes`,
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          case 'delay':
+            Alert.alert(
+              '⏰ Retard du bus',
+              data.message || `Le bus a ${data.delayMinutes} minutes de retard`,
+              [{ text: 'OK' }]
+            );
+            break;
+            
+          default:
+            // Notification générique
+            Alert.alert(
+              data.title || '📱 SchoolTrack',
+              data.message || 'Notification du bus',
+              [{ text: 'OK' }]
+            );
+            break;
+        }
+        
+        // Déclencher une notification push locale
+        if (data.title && data.message) {
+          triggerLocalNotification(
+            data.title,
+            data.message,
+            {
+              type: notificationType,
+              busId: data.busId,
+              stopId: data.stopId,
+              ...data
+            }
+          );
+        }
+      });
+
+      // SUPPRIMER les écouteurs obsolètes (ils sont tous gérés par scheduled-notification maintenant) :
+      // - parent-notification
+      // - child_stop_arrival
+      // - delay
+      // - pause_started
+      // - pause_ended
+      // - delay_due_to_pause
+      // - arrived_at_stop
 
     } catch (error) {
       console.error('❌ Erreur initialisation WebSocket:', error);
@@ -195,53 +298,52 @@ export const useBusSimulation = () => {
   }, []);
 
   /**
- * Déclencher une notification locale
- */
-const triggerLocalNotification = useCallback(async (title, body, data = {}) => {
-  try {
-    // Vérifier si les notifications sont disponibles
-    const { status } = await Notifications.getPermissionsAsync();
-    
-    if (status !== 'granted') {
-      console.log('⚠️ Permissions notifications non accordées');
-      return;
+   * Déclencher une notification locale
+   */
+  const triggerLocalNotification = useCallback(async (title, body, data = {}) => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      
+      if (status !== 'granted') {
+        console.log('⚠️ Permissions notifications non accordées');
+        return;
+      }
+      
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data,
+          sound: 'default',
+        },
+        trigger: null,
+      });
+      
+      console.log('📤 Notification locale envoyée:', { title, body });
+    } catch (error) {
+      console.error('❌ Erreur notification locale:', error);
     }
-    
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title,
-        body,
-        data,
-        sound: 'default',
-      },
-      trigger: null, // Immédiatement
-    });
-    
-    console.log('📤 Notification locale envoyée:', { title, body });
-  } catch (error) {
-    console.error('❌ Erreur notification locale:', error);
-  }
-}, []);
+  }, []);
 
-/**
- * Obtenir le titre selon le type de notification
- */
-const getNotificationTitle = useCallback((type) => {
-  const titles = {
-    departure: '🚌 Départ du bus',
-    stop: '🛑 Arrêt du bus',
-    approaching: '🚌 Bus en approche',
-    arrival: '🎉 Arrivée à l\'école',
-    delay: '⏰ Retard du bus',
-    emergency: '🚨 Urgence',
-    info: 'ℹ️ Information SchoolTrack',
-    test: '🧪 Test de notification',
-  };
-  
-  return titles[type] || '📱 SchoolTrack';
-}, []);
+  /**
+   * Obtenir le titre selon le type de notification
+   */
+  const getNotificationTitle = useCallback((type) => {
+    const titles = {
+      departure: '🚌 Départ du bus',
+      stop: '🛑 Arrêt du bus',
+      approaching: '🚌 Bus en approche',
+      arrival: '🎉 Arrivée à l\'école',
+      delay: '⏰ Retard du bus',
+      emergency: '🚨 Urgence',
+      info: 'ℹ️ Information SchoolTrack',
+      test: '🧪 Test de notification',
+    };
+    
+    return titles[type] || '📱 SchoolTrack';
+  }, []);
 
-  // Démarrer une simulation (version corrigée)
+  // Démarrer une simulation
   const startSimulation = useCallback(async (
     busId,
     trajetId,
@@ -263,6 +365,10 @@ const getNotificationTitle = useCallback((type) => {
       console.log('📍 Nombre d\'arrêts:', stops.length);
       console.log('⚡ Vitesse demandée:', speed);
 
+      // Trouver l'arrêt enfant pour récupérer son nom
+      const childStop = stops.find(stop => stop.id === childStopId);
+      const childName = childStop?.childName || 'votre enfant';
+
       // 1. Préparer les points pour OpenRouteService
       const routingPoints = stops
         .filter(stop => stop.latitude && stop.longitude)
@@ -274,7 +380,7 @@ const getNotificationTitle = useCallback((type) => {
 
       console.log('📍 Points pour routage:', routingPoints.length);
 
-      // 2. Générer le trajet réaliste (votre fonction existante)
+      // 2. Générer le trajet réaliste
       console.log('🔄 Génération du trajet...');
       const realisticRoute = await getRealisticRoute(routingPoints);
       
@@ -293,6 +399,8 @@ const getNotificationTitle = useCallback((type) => {
         order: stop.order,
         isSchool: stop.type === 'school' || stop.id < 0,
         stopDuration: stop.id === childStopId ? 60 : 30,
+        childStopId: stop.id === childStopId ? stop.id : undefined,
+        childName: stop.id === childStopId ? childName : undefined,
       }));
 
       console.log('📤 Envoi au backend...');
@@ -320,9 +428,7 @@ const getNotificationTitle = useCallback((type) => {
             console.log('📨 Réponse backend:', response);
             
             if (response?.success) {
-              // Rejoindre la room du bus
               joinBusRoom(busId);
-              
               Alert.alert('Succès', 'Simulation démarrée');
               resolve({ success: true, data: response });
             } else {
@@ -443,7 +549,6 @@ const getNotificationTitle = useCallback((type) => {
     console.log('🔌 Déconnexion WebSocket');
     
     if (socketRef.current) {
-      // Quitter la room actuelle
       if (currentBusIdRef.current) {
         leaveBusRoom(currentBusIdRef.current);
       }
@@ -456,6 +561,7 @@ const getNotificationTitle = useCallback((type) => {
     setIsSimulationActive(false);
     setBusPosition(null);
     setSimulationStatus(null);
+    setNextStopInfo(null);
     setSimulationSpeed(1);
     currentBusIdRef.current = null;
   }, [leaveBusRoom]);
@@ -480,6 +586,7 @@ const getNotificationTitle = useCallback((type) => {
     loading,
     error,
     simulationSpeed,
+    nextStopInfo, // EXPOSER nextStopInfo
     currentBusId: currentBusIdRef.current,
     
     // Actions
