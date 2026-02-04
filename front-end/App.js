@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Alert } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import RootNavigation from './src/components/RootNavigation';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
-import { usePushNotifications } from './src/hooks/usePushNotifications';
+import { usePushNotifications } from './src/Hooks/usePushNotifications';
 import * as SplashScreen from 'expo-splash-screen';
 
-// Empêcher le splash screen de se cacher automatiquement
+// ──────────────────────────────────────────────────────────────
+// IMPORT IMPORTANT pour Firebase Performance
+// ──────────────────────────────────────────────────────────────
+import '@react-native-firebase/app';
+import perf from '@react-native-firebase/perf';
+
+// Empecher le splash screen de se cacher automatiquement
 SplashScreen.preventAutoHideAsync();
 
 // Composant wrapper pour la logique des notifications
 function AppContent() {
   const [appIsReady, setAppIsReady] = useState(false);
-  
+
   // Initialiser les push notifications
   const {
     expoPushToken,
@@ -22,21 +28,43 @@ function AppContent() {
     sendLocalNotification,
   } = usePushNotifications();
 
-  // Vérifier les permissions et préparer l'app
   useEffect(() => {
     async function prepare() {
+      // ──────────────────────────────────────────────────────────────
+      // DÉBUT DE LA MESURE DU TTI
+      // ──────────────────────────────────────────────────────────────
+      const ttiTrace = await perf().startTrace('tti_app_ready'); // ← On commence la trace
+
       try {
-        // Initialiser les notifications
+        // 1. Initialiser les notifications
         await registerForPushNotificationsAsync();
-        
-        // Simuler un chargement (optionnel)
+
+        // 2. (Optionnel) Simuler un petit chargement ou attendre d'autres promesses
+        //    Ex : chargement fonts, vérification auth, fetch initial...
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
+        // ──────────────────────────────────────────────────────────────
+        // Ici tu peux ajouter d'autres await importants pour ton app
+        // Exemples :
+        // await loadFontsAsync();
+        // await checkAuthAndRedirect();
+        // await fetchInitialData();
+        // ──────────────────────────────────────────────────────────────
+
       } catch (error) {
         console.warn('Erreur lors de la préparation:', error);
       } finally {
-        // Marquer l'app comme prête
+        // Tout est prêt → on marque l'app comme prête
         setAppIsReady(true);
+
+        // ──────────────────────────────────────────────────────────────
+        // FIN DE LA MESURE DU TTI
+        // ──────────────────────────────────────────────────────────────
+        await ttiTrace.stop(); // ← On arrête la trace ici = TTI mesuré !
+
+        console.log('✅ TTI trace envoyée à Firebase !');
+
+        // Cacher le splash screen
         await SplashScreen.hideAsync();
       }
     }
@@ -48,10 +76,7 @@ function AppContent() {
   useEffect(() => {
     if (notification) {
       console.log('📨 Notification reçue dans App:', notification);
-      
-      // Vous pouvez ajouter une logique globale de gestion des notifications ici
-      // Par exemple : navigation vers un écran spécifique
-      // ou affichage d'une alerte personnalisée
+      // Tu peux ajouter une logique de navigation ici si besoin
     }
   }, [notification]);
 

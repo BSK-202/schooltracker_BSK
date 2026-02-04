@@ -13,7 +13,7 @@ import {
 import ProfileTabStyles from '../styles/ProfileTabStyles';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/Authslice';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../Hooks/useAuth';
 
 export default function ProfileTab({ 
   userData, 

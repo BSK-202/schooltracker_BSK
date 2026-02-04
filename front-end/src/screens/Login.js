@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Input from '../components/Input';
 import LoginStyles from '../styles/LoginStyles';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../Hooks/useAuth';
 
 
 export default function LoginScreen({ navigation }) {
