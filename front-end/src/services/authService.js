@@ -1,6 +1,6 @@
 
 import authApi from '../APIS/authApi';
-import loginApi from '../APIS/loginApi'; // Note: vérifiez le nom du fichier
+import loginApi from '../APIS/loginAPI'; // Note: vérifiez le nom du fichier
 
 const authService = {
   login: async (phone, password) => {

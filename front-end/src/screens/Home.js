@@ -6,7 +6,7 @@ import HomeTab from './HomeTab';
 import TrackingTab from './TrackingTab';
 import ProfileTab from './ProfileTab';
 import TabStyles from '../styles/TabStyles';
-import { useProfile } from '../hooks/useProfile';
+import { useProfile } from '../Hooks/useProfile';
 
 
 

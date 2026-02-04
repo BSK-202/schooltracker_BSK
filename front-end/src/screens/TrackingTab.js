@@ -22,7 +22,7 @@ import {
   setMarkers,
   setPolylines,
 } from '../redux/TrackingThunk';
-import { useBusSimulation } from '../hooks/useBusSimulation';
+import { useBusSimulation } from '../Hooks/useBusSimulation';
 import trackingTabStyles from '../styles/TrackingTabStyles';
 
 const styles = trackingTabStyles;
