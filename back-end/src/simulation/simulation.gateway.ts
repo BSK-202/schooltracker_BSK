@@ -12,7 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger, forwardRef,
   Inject, } from '@nestjs/common';
 import { SimulationService } from './simulation.service';
-
+import { NotificationsService } from '../notifications/notifications.service';
 @WebSocketGateway({
   namespace: '/simulation',
   cors: {
@@ -30,6 +30,8 @@ export class SimulationGateway implements OnGatewayConnection, OnGatewayDisconne
   constructor(
     @Inject(forwardRef(() => SimulationService))
     private readonly simulationService: SimulationService,
+    
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   handleConnection(client: Socket) {
@@ -302,4 +304,106 @@ export class SimulationGateway implements OnGatewayConnection, OnGatewayDisconne
   
   this.logger.log(`Notification parent diffusée pour bus ${busId}: ${notificationData.type}`);
 }
+
+
+ broadcastScheduledNotification(notificationInfo: {
+    busId: number;
+    stopId: number;
+    type: string;
+    parentIds: number[];
+    data: any;
+  }): void {
+    const { busId, type, parentIds, data } = notificationInfo;
+    
+    // 1. Diffuser aux clients WebSocket
+    this.server.to(`bus-${busId}`).emit('scheduled-notification', {
+      busId,
+      type,
+      ...data,
+      timestamp: new Date(),
+    });
+
+    // 2. Envoyer les notifications push via le service de notifications
+    this.sendPushNotifications(notificationInfo);
+    
+    this.logger.log(`Notification "${type}" diffusée pour bus ${busId} à ${parentIds.length} parent(s)`);
+  }
+
+   private async sendPushNotifications(notificationInfo: {
+    busId: number;
+    stopId: number;
+    type: string;
+    parentIds: number[];
+    data: any;
+  }): Promise<void> {
+    try {
+      const { busId, type, parentIds, data } = notificationInfo;
+      
+      // Titres selon le type
+      const titles = {
+        'departure': '🚌 Départ du bus',
+        '5min_before': '🕐 Bus en approche',
+        'on_time': '✅ Bus à l\'arrêt',
+        'delay': '⏰ Retard du bus',
+        'arrival': '🎉 Arrivée à l\'école',
+      };
+
+      const title = titles[type] || '📱 SchoolTrack';
+      
+      // Messages selon le type
+      let message = '';
+      switch (type) {
+        case 'departure':
+          message = `Le bus ${busId} vient de partir. Suivez son trajet en temps réel.`;
+          break;
+        case '5min_before':
+          message = `Le bus sera à votre arrêt dans 5 minutes (prévu à ${data.scheduledTime})`;
+          break;
+        case 'on_time':
+          message = data.isOnTime 
+            ? `Le bus est à l'heure à votre arrêt (${data.scheduledTime})`
+            : `Le bus est en retard de ${data.delayMinutes} minute(s) à votre arrêt`;
+          break;
+        case 'delay':
+          message = `Le bus a ${data.delayMinutes} minutes de retard à votre arrêt (prévu à ${data.scheduledTime})`;
+          break;
+        case 'arrival':
+          message = `Votre enfant est bien arrivé à l'école à ${data.arrivalTime}`;
+          break;
+        default:
+          message = `Notification du bus ${busId}`;
+      }
+
+      // Données supplémentaires pour la navigation
+      const notificationData = {
+        screen: 'TrackingTab',
+        busId,
+        stopId: notificationInfo.stopId,
+        type,
+        ...data,
+      };
+
+      // Utiliser le service de notifications pour envoyer les push
+      await this.notificationsService.sendToParents(
+        parentIds,
+        title,
+        message,
+        notificationData
+      );
+
+    } catch (error) {
+      this.logger.error(`Erreur envoi notifications push:`, error);
+    }
+  }
+
+  /**
+   * Diffuser le statut temporel
+   */
+  broadcastTimeStatus(busId: number, timeStatus: any) {
+    this.server.to(`bus-${busId}`).emit('time-status', {
+      busId,
+      ...timeStatus,
+      timestamp: new Date(),
+    });
+  }
 }

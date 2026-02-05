@@ -35,7 +35,7 @@ export default function TrackingTab() {
   const [customSpeed, setCustomSpeed] = useState('1');
   const [showBottomPanel, setShowBottomPanel] = useState(true); // Contrôle l'affichage du panneau inférieur
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false); // Pour réduire le panneau
-
+  const [nextStopInfo, setNextStopInfo] = useState(null);
   // Sélectionner les données du state
   const {
     loading,
@@ -176,6 +176,11 @@ export default function TrackingTab() {
         
         // Démarrer la simulation
         if (!isSimulationActive || currentBusId !== busId) {
+
+          const allStops = [...result.route.stops].map(stop => ({
+            ...stop,
+            childName: stop.id === childStopId ? child.name : undefined,
+          }));
           const simulationResult = await startSimulation(
             busId,
             trajetId,

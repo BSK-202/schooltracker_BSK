@@ -8,12 +8,16 @@ import { Parent } from '../admin/parents/entities/parent.entity'; // AJOUTER
 import { Student } from '../admin/students/entities/student.entity'; // AJOUTER
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
+import { Trajet } from 'src/admin/trajets/entities/trajet.entity';
+import { TrajetStop } from 'src/admin/trajets/entities/trajet-stop.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Parent,  // AJOUTER
       Student, // AJOUTER
+      Trajet,
+      TrajetStop
     ]),
     forwardRef(() => NotificationsModule), // AJOUTER CETTE LIGNE
   ],

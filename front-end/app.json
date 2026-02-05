@@ -1,20 +1,27 @@
 {
   "expo": {
-    "name": "front-end",
-    "slug": "front-end",
+    "name": "SchoolTracker",
+    "slug": "schooltracker-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fadmaikrame.schooltracker",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
+    
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -23,23 +30,38 @@
       "edgeToEdgeEnabled": true,
       "package": "com.fadmaikrame.schooltracker",
       "googleServicesFile": "./google-services.json",
-       "config": {
+      "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDoKui2FzdBfnN_UnS2aLrRUPlYKiio34I"
         }
-      }
+      },
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
+    
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#2196F3"
+        }
+      ]
     ],
+    
     "extra": {
       "eas": {
-        "projectId": "91db13a3-7b59-4caf-ade3-38d707fb627a"
+        "projectId": "b36fa91c-9d23-4329-9bfc-2b3430905642"
       }
     },
-    "owner": "fadmajadda"
+    
+    "owner": "fadma.jadda-etu"
   }
 }
