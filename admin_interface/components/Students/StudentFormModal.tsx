@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+
 import { 
   X, 
   User, 
@@ -236,8 +238,13 @@ export default function StudentFormModal({
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">QR Code</label>
                   <div className="flex items-center gap-2 px-4 py-2.5 border rounded-lg bg-gray-50">
-                    <QrCode className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm font-mono">{initialData.qrCode}</span>
+                     <QRCodeSVG
+                          value={initialData.qrCode}
+                          size={64}
+                          level="H" // Niveau de correction d'erreur
+                          includeMargin={false}
+                          className="border rounded"
+                        />
                   </div>
                 </div>
               )}

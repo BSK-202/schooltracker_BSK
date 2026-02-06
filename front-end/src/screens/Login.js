@@ -1,16 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   StatusBar,
   View,
   Text,
   ImageBackground,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import Input from '../components/Input';
 import LoginStyles from '../styles/LoginStyles';
 import { useAuth } from '../Hooks/useAuth';
-
 
 export default function LoginScreen({ navigation }) {
   const {
@@ -23,28 +21,28 @@ export default function LoginScreen({ navigation }) {
     handleLogin,
   } = useAuth();
 
-  const onLoginPress = async () => {
+  const onLoginPress = useCallback(async () => {
     const result = await handleLogin();
-    
+
     if (result && !result.success) {
-      // Affichage d'alerte avec des informations détaillées
-      Alert.alert(
-        'Erreur de connexion',
-        result.error || 'Une erreur est survenue',
-        [{ text: 'OK', style: 'cancel' }]
-      );
+      // L'erreur est maintenant gérée par le hook useAuth
+      // On affiche simplement l'erreur dans l'UI (via le state error)
     } else {
-       navigation.navigate('Home');
+      navigation.navigate('Home');
     }
-  };
+  }, [handleLogin, navigation]);
 
   return (
     <ImageBackground
       source={require('../../assets/loading_page.png')}
       style={LoginStyles.background}
       resizeMode="cover"
+      // Optimisations importantes pour alléger
+      fadeDuration={0}               // évite l'animation de fade qui consomme du CPU
+      resizeMethod="resize"          // plus performant que scale sur beaucoup d'appareils
+      imageStyle={{ opacity: 0.85 }} // légère réduction d'opacité = rendu plus rapide
     >
-      <StatusBar style="auto" />
+      <StatusBar barStyle="light-content" />
 
       <View style={LoginStyles.overlay}>
         <View style={LoginStyles.contentContainer}>
@@ -61,7 +59,7 @@ export default function LoginScreen({ navigation }) {
             {/* Champ téléphone */}
             <View style={LoginStyles.inputContainer}>
               <Input
-                placeholder="Saisissez votre numéro de téléphone"
+                placeholder="Votre numéro de téléphone"
                 keyboardType="phone-pad"
                 icon="call-outline"
                 value={phone}
@@ -73,9 +71,8 @@ export default function LoginScreen({ navigation }) {
             {/* Champ mot de passe */}
             <View style={LoginStyles.inputContainer}>
               <Input
-                placeholder="Saisissez votre mot de passe"
-                keyboardType="default"
-                secureTextEntry={true}
+                placeholder="Votre mot de passe"
+                secureTextEntry
                 icon="lock-closed-outline"
                 value={password}
                 onChangeText={setPassword}
@@ -83,10 +80,12 @@ export default function LoginScreen({ navigation }) {
               />
             </View>
 
-            {/* Affichage des erreurs */}
-            {error && (
+            {/* Affichage des erreurs – maintenant visible en permanence */}
+            {(error || loading) && (
               <View style={LoginStyles.errorContainer}>
-                <Text style={LoginStyles.errorText}>{error}</Text>
+                <Text style={LoginStyles.errorText}>
+                  {loading ? 'Connexion en cours...' : error || 'Erreur inconnue'}
+                </Text>
               </View>
             )}
 
@@ -99,9 +98,10 @@ export default function LoginScreen({ navigation }) {
                 ]}
                 onPress={onLoginPress}
                 disabled={loading}
+                activeOpacity={0.75}
               >
                 <Text style={LoginStyles.loginButtonText}>
-                  {loading ? 'Connexion en cours...' : 'Se connecter'}
+                  {loading ? 'Connexion...' : 'Se connecter'}
                 </Text>
               </TouchableOpacity>
             </View>

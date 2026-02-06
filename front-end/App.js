@@ -1,102 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import RootNavigation from './src/components/RootNavigation';
 import { Provider } from 'react-redux';
+import * as SplashScreen from 'expo-splash-screen';
+import RootNavigation from './src/components/RootNavigation';
 import store from './src/redux/store';
 import { usePushNotifications } from './src/Hooks/usePushNotifications';
-import * as SplashScreen from 'expo-splash-screen';
 
-// ──────────────────────────────────────────────────────────────
-// IMPORT IMPORTANT pour Firebase Performance
-// ──────────────────────────────────────────────────────────────
-import '@react-native-firebase/app';
-import perf from '@react-native-firebase/perf';
-
-// Empecher le splash screen de se cacher automatiquement
 SplashScreen.preventAutoHideAsync();
 
-// Composant wrapper pour la logique des notifications
-function AppContent() {
-  const [appIsReady, setAppIsReady] = useState(false);
-
-  // Initialiser les push notifications
-  const {
-    expoPushToken,
-    notification,
-    permissionStatus,
-    registerForPushNotificationsAsync,
-    sendLocalNotification,
-  } = usePushNotifications();
+export default function App() {
+  const [ready, setReady] = useState(false);
+  const { registerForPushNotificationsAsync } = usePushNotifications();
 
   useEffect(() => {
-    async function prepare() {
-      // ──────────────────────────────────────────────────────────────
-      // DÉBUT DE LA MESURE DU TTI
-      // ──────────────────────────────────────────────────────────────
-      const ttiTrace = await perf().startTrace('tti_app_ready'); // ← On commence la trace
+    let mounted = true;
+
+    (async () => {
+      const start = Date.now();
+      let trace = null;
 
       try {
-        // 1. Initialiser les notifications
-        await registerForPushNotificationsAsync();
+        // Option : charger perf seulement si besoin
+        if (!__DEV__) {
+          try {
+            const perf = require('@react-native-firebase/perf').default;
+            trace = await perf().startTrace('tti_app_ready');
+          } catch {}
+        }
 
-        // 2. (Optionnel) Simuler un petit chargement ou attendre d'autres promesses
-        //    Ex : chargement fonts, vérification auth, fetch initial...
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Tâche non bloquante
+        registerForPushNotificationsAsync().catch(() => {});
 
-        // ──────────────────────────────────────────────────────────────
-        // Ici tu peux ajouter d'autres await importants pour ton app
-        // Exemples :
-        // await loadFontsAsync();
-        // await checkAuthAndRedirect();
-        // await fetchInitialData();
-        // ──────────────────────────────────────────────────────────────
-
-      } catch (error) {
-        console.warn('Erreur lors de la préparation:', error);
+        const elapsed = Date.now() - start;
+        if (elapsed < 450) {
+          await new Promise(r => setTimeout(r, 450 - elapsed));
+        }
+      } catch (err) {
+        if (__DEV__) console.warn('App init error:', err);
       } finally {
-        // Tout est prêt → on marque l'app comme prête
-        setAppIsReady(true);
-
-        // ──────────────────────────────────────────────────────────────
-        // FIN DE LA MESURE DU TTI
-        // ──────────────────────────────────────────────────────────────
-        await ttiTrace.stop(); // ← On arrête la trace ici = TTI mesuré !
-
-        console.log('✅ TTI trace envoyée à Firebase !');
-
-        // Cacher le splash screen
-        await SplashScreen.hideAsync();
+        if (mounted) {
+          setReady(true);
+          if (trace) await trace.stop().catch(() => {});
+          await SplashScreen.hideAsync().catch(() => {});
+        }
       }
-    }
+    })();
 
-    prepare();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Gérer les notifications reçues
-  useEffect(() => {
-    if (notification) {
-      console.log('📨 Notification reçue dans App:', notification);
-      // Tu peux ajouter une logique de navigation ici si besoin
-    }
-  }, [notification]);
-
-  // Afficher le splash screen pendant le chargement
-  if (!appIsReady) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <ActivityIndicator size="large" color="#2196F3" />
-      </View>
-    );
+  if (!ready) {
+    return null; // clé : on garde le splash natif
   }
 
-  return <RootNavigation />;
-}
-
-// Composant principal
-export default function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <RootNavigation />
     </Provider>
   );
 }

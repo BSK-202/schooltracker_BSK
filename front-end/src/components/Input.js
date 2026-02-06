@@ -1,66 +1,80 @@
-import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function Input(props) {
-    return (
-        <View style={[styles.container, props.containerStyle]}>
-            {props.icon && (
-                <Ionicons 
-                    name={props.icon} 
-                    size={20} 
-                    color="#7f8c8d" 
-                    style={styles.icon} 
-                />
-            )}
-            <TextInput 
-                style={[
-                    styles.input,
-                    props.icon && styles.inputWithIcon,
-                    props.style
-                ]}
-                placeholder={props.placeholder}
-                keyboardType={props.keyboardType}
-                secureTextEntry={props.secureTextEntry}
-                placeholderTextColor="#7f8c8d"
-                value={props.value}
-                onChangeText={props.onChangeText}
-                autoCapitalize={props.autoCapitalize || 'none'}
-                autoCorrect={false}
-                {...props}
-            />
-        </View>
-    );
+export default function Input({
+  containerStyle,
+  style,
+  icon,
+  placeholder,
+  keyboardType,
+  secureTextEntry,
+  value,
+  onChangeText,
+  autoCapitalize = 'none',
+  autoCorrect = false,
+  ...rest
+}) {
+  return (
+    <View style={[styles.container, containerStyle]}>
+      {icon && (
+        <Ionicons
+          name={icon}
+          size={20}
+          color="#6b7280"
+          style={styles.icon}
+        />
+      )}
+
+      <TextInput
+        style={[styles.input, icon && styles.inputWithIcon, style]}
+        placeholder={placeholder}
+        keyboardType={keyboardType}
+        secureTextEntry={secureTextEntry}
+        placeholderTextColor="#9ca3af"
+        value={value}
+        onChangeText={onChangeText}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={autoCorrect}
+        {...rest}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-    },
-    icon: {
-        position: 'absolute',
-        left: 15,
-        zIndex: 10,
-    },
-    input: {
-        backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: '#bdc3c7',
-        borderRadius: 12,
-        padding: 16,
-        marginVertical: 10,
-        fontSize: 16,
-        width: '100%',
-        maxWidth: 350,
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  icon: {
+    position: 'absolute',
+    left: 16,
+    zIndex: 1,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#1f2937',
+    ...Platform.select({
+      ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 2,
-    },
-    inputWithIcon: {
-        paddingLeft: 45, // Espace pour l'icône
-    }
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
+  },
+  inputWithIcon: {
+    paddingLeft: 48,
+  },
 });

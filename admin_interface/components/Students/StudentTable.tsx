@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+
 import {
   Eye,
   Edit,
@@ -142,11 +144,18 @@ export default function StudentTable({
                       </div>
                     </div>
                   </td>
-
                   <td className="py-3 px-4">
-                    <div className="flex items-center gap-2 text-xs font-mono text-gray-600">
-                      <QrCode className="w-3 h-3" />
-                      {student.qrCode}
+                    <div className="flex items-center gap-2 text-xs font-mono">
+                      <div className="w-16 h-16 flex items-center justify-center">
+                        <QRCodeSVG
+                          value={student.qrCode}
+                          size={64}
+                          level="H" // Niveau de correction d'erreur
+                          includeMargin={false}
+                          className="border rounded"
+                        />
+                      </div>
+                     
                     </div>
                   </td>
 
