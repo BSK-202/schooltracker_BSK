@@ -916,7 +916,26 @@ Le projet a été réalisé afin de mettre en pratique :
 Projet réalisé dans un cadre **académique et personnel**.
 
 Tous droits réservés © 2026 **BSK-202**.
+---
 
+# 👥 Équipe
+
+<div align="center">
+
+### BSK-202
+
+[![GitHub](https://img.shields.io/badge/GitHub-BSK--202-181717?style=for-the-badge\&logo=github)](https://github.com/BSK-202)
+
+### fadmajadda
+
+[![GitHub](https://img.shields.io/badge/GitHub-fadmajadda-181717?style=for-the-badge\&logo=github)](https://github.com/fadmajadda)
+
+
+</div>
+
+---
+
+<div align="center">
 ---
 
 # 👩‍💻 Auteure
