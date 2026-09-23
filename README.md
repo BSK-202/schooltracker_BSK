@@ -925,7 +925,7 @@ Développement Full-Stack · Backend · Applications mobiles · Systèmes distri
 
 [![GitHub](https://img.shields.io/badge/GitHub-BSK--202-181717?style=for-the-badge\&logo=github)](https://github.com/BSK-202)
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ikrame_BASKANE-0A66C2?style=for-the-badge\&logo=linkedin)](https://linkedin.com/in/ikrame-baskane)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ikrame_BASKANE-0A66C2?style=for-the-badge\&logo=linkedin)](https://www.linkedin.com/in/ikrame-baskane-781629279/)
 
 </div>
 
