@@ -911,6 +911,14 @@ Le projet a été réalisé afin de mettre en pratique :
 
 ---
 
+# 📄 Licence
+
+Projet réalisé dans un cadre **académique et personnel**.
+
+Tous droits réservés © 2026 **BSK-202**.
+
+---
+
 # 👩‍💻 Auteure
 
 <div align="center">
